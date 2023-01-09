@@ -9,7 +9,6 @@ This custom panel shows automations in a tree structure. The tree is generate by
 1. Place the file `automations-tree.js` in `/config/www/`
 2. Add the following block to the `configuration.yaml`
 3. If your Automations are not structured like _Folder // Folder // AutomationName_, adjust the `divider` variable in `automations-tree.js`.
-4. Restart Home Assistant
 
 ```
 panel_custom:
@@ -20,3 +19,5 @@ panel_custom:
     sidebar_icon: mdi:robot
     module_url: /local/automations-tree.js
 ```
+
+4. Restart Home Assistant
