@@ -16,9 +16,12 @@ class AutomationsTree extends LitElement {
    */
   divider = "//";
   // 0 = fully collapsed
-  // 1 = automations expanded
-  defaultOpenTreeDepth=3;
-
+  // 1..X = open Xth level folders and close others
+  defaultOpenTreeDepth=999;
+  /*
+   *    END ADJUST TO YOUR NEEDS
+   */
+   
   getAutomations() {
     let automations = [];
     Object.keys(this.hass.states).forEach((state) => {
