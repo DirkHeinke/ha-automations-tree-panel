@@ -15,7 +15,9 @@ class AutomationsTree extends LitElement {
    *    ADJUST TO YOUR NEEDS
    */
   divider = "//";
-  defaultSummaryOpen = true;
+  // 0 = fully collapsed
+  // 1 = automations expanded
+  defaultOpenTreeDepth=3;
 
   getAutomations() {
     let automations = [];
@@ -53,7 +55,6 @@ class AutomationsTree extends LitElement {
         } else {
           tree.children.push({
             name: firstPath,
-            summaryOpen: this.defaultSummaryOpen,
             automations: [a],
             children: [],
           });
@@ -71,7 +72,7 @@ class AutomationsTree extends LitElement {
     i++;
     return html`
       <div id="automation">
-        <details ?open=${tree.summaryOpen}>
+        <details ?open=${i<=this.defaultOpenTreeDepth}>
           <summary style=${"padding-left: " + (i * 25 + 10) + "px"}>
             <span> ${tree.name} </span>
           </summary>
@@ -103,7 +104,6 @@ class AutomationsTree extends LitElement {
     this.calculatePath(automations);
     let tree = this.generateTree({
       name: "Automations",
-      summaryOpen: true,
       automations: automations,
       children: [],
     });
