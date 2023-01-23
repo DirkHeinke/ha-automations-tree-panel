@@ -84,12 +84,12 @@ class AutomationsTree extends LitElement {
     this.calculatePath([automation]);
     return html`
       <div class="automation" style=${"padding-left: " + (i * 25 + 35) + "px"}>
-        <a href="/config/automation/edit/${automation.id}">
-          <span class="automation-name">${automation.path[automation.path.length - 1]}</span>
+        <a href="/config/automation/edit/${automation.id}" class="automation-name">
+          ${automation.path[automation.path.length - 1]}
         </a>
         <div class="automation-last-run">
-          <a href="/config/automation/trace/${automation.id}">
-            <span class="automation-trace">${AutomationsTree.fromNow( automation.last_triggered)}</span>
+          <a href="/config/automation/trace/${automation.id}" class="automation-trace">
+            ${AutomationsTree.fromNow( automation.last_triggered)}
           </a>  
         </div>
       </div>
