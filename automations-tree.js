@@ -15,7 +15,13 @@ class AutomationsTree extends LitElement {
    *    ADJUST TO YOUR NEEDS
    */
   divider = "//";
-
+  // 0 = fully collapsed
+  // 1..X = open Xth level folders and close others
+  defaultOpenTreeDepth=999;
+  /*
+   *    END ADJUST TO YOUR NEEDS
+   */
+   
   getAutomations() {
     let automations = [];
     Object.keys(this.hass.states).forEach((state) => {
@@ -23,6 +29,7 @@ class AutomationsTree extends LitElement {
         automations.push({
           id: this.hass.states[state].attributes.id,
           friendly_name: this.hass.states[state].attributes.friendly_name,
+          last_triggered: this.hass.states[state].attributes.last_triggered,
           path: [],
         });
       }
@@ -68,7 +75,7 @@ class AutomationsTree extends LitElement {
     i++;
     return html`
       <div id="automation">
-        <details open>
+        <details ?open=${i<=this.defaultOpenTreeDepth}>
           <summary style=${"padding-left: " + (i * 25 + 10) + "px"}>
             <span> ${tree.name} </span>
           </summary>
@@ -83,9 +90,14 @@ class AutomationsTree extends LitElement {
     this.calculatePath([automation]);
     return html`
       <div class="automation" style=${"padding-left: " + (i * 25 + 35) + "px"}>
-        <a href="/config/automation/edit/${automation.id}">
+        <a href="/config/automation/edit/${automation.id}" class="automation-name">
           ${automation.path[automation.path.length - 1]}
         </a>
+        <div class="automation-last-run">
+          <a href="/config/automation/trace/${automation.id}" class="automation-trace">
+            ${AutomationsTree.fromNow( automation.last_triggered)}
+          </a>  
+        </div>
       </div>
     `;
   }
@@ -101,6 +113,49 @@ class AutomationsTree extends LitElement {
     return html` ${this.renderTree(tree)} `;
   }
 
+  /**
+   *  * Human readable elapsed or remaining time (example: 3 minutes ago)
+   * @param  {Date|Number|String} date A Date object, timestamp or string parsable with Date.parse()
+   * @param  {Date|Number|String} [nowDate] A Date object, timestamp or string parsable with Date.parse()
+   * @param  {Intl.RelativeTimeFormat} [trf] A Intl formater
+   * @return {string} Human readable elapsed or remaining time
+   * @author github.com/victornpb
+   * @see https://stackoverflow.com/a/67338038/938822
+   */
+  static fromNow(date, nowDate = Date.now(), rft = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" })) {
+    if (date == null) {
+      return "Never";
+    }
+
+    const SECOND = 1000;
+    const MINUTE = 60 * SECOND;
+    const HOUR = 60 * MINUTE;
+    const DAY = 24 * HOUR;
+    const WEEK = 7 * DAY;
+    const MONTH = 30 * DAY;
+    const YEAR = 365 * DAY;
+    const intervals = [
+      { ge: YEAR, divisor: YEAR, unit: 'year' },
+      { ge: MONTH, divisor: MONTH, unit: 'month' },
+      { ge: WEEK, divisor: WEEK, unit: 'week' },
+      { ge: DAY, divisor: DAY, unit: 'day' },
+      { ge: HOUR, divisor: HOUR, unit: 'hour' },
+      { ge: MINUTE, divisor: MINUTE, unit: 'minute' },
+      { ge: 30 * SECOND, divisor: SECOND, unit: 'seconds' },
+      { ge: 0, divisor: 1, text: 'just now' },
+    ];
+    const now = typeof nowDate === 'object' ? nowDate.getTime() : new Date(nowDate).getTime();
+    const diff = now - (typeof date === 'object' ? date : new Date(date)).getTime();
+    const diffAbs = Math.abs(diff);
+    for (const interval of intervals) {
+      if (diffAbs >= interval.ge) {
+        const x = Math.round(Math.abs(diff) / interval.divisor);
+        const isFuture = diff < 0;
+        return interval.unit ? rft.format(isFuture ? x : -x, interval.unit) : interval.text;
+      }
+    }
+  }
+
   static get styles() {
     return css`
       .automation {
@@ -113,6 +168,26 @@ class AutomationsTree extends LitElement {
         height: 52px;
         line-height: 52px;
         border-bottom: 1px solid #9a9a9a;
+      }
+
+      .automation-name {
+        color: var(--primary-text-color);
+        font-weight: bold;
+        text-decoration: none;
+      }
+
+      .automation-trace {
+        color: var(--primary-text-color);
+        text-decoration: none;
+      }
+
+      div.automation-last-run {
+        float:right;
+        padding-right: 15px;
+      }
+
+      div.automation a {
+        text-decoration: none;
       }
     `;
   }
