@@ -1,6 +1,6 @@
 # Automation Tree for Home Assistant
 
-![](/automation-tree-screenshot.jpeg)
+![](/automation-tree-screenshot.png)
 
 This custom panel shows automations in a tree structure. The tree is generate by splitting the automation names (default on //).
 
