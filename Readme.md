@@ -9,7 +9,7 @@ The default automation view for the automations show above looks like this:
 
 ## Installation
 
-1. Place the file `automations-tree.js` in `/config/www/`
+1. Place the file `automations-tree.js` in `<config>/www/`, where `<config>` is the root folder of the Home Assistant installation (the one with `configuration.yaml`)
 2. Add the following block to the `configuration.yaml`
 
 ```
