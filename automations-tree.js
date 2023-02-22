@@ -17,11 +17,11 @@ class AutomationsTree extends LitElement {
   divider = "//";
   // 0 = fully collapsed
   // 1..X = open Xth level folders and close others
-  defaultOpenTreeDepth=999;
+  defaultOpenTreeDepth = 999;
   /*
    *    END ADJUST TO YOUR NEEDS
    */
-   
+
   getAutomations() {
     let automations = [];
     Object.keys(this.hass.states).forEach((state) => {
@@ -75,7 +75,7 @@ class AutomationsTree extends LitElement {
     i++;
     return html`
       <div id="automation">
-        <details ?open=${i<=this.defaultOpenTreeDepth}>
+        <details ?open=${i <= this.defaultOpenTreeDepth}>
           <summary style=${"padding-left: " + (i * 25 + 10) + "px"}>
             <span> ${tree.name} </span>
           </summary>
@@ -90,13 +90,19 @@ class AutomationsTree extends LitElement {
     this.calculatePath([automation]);
     return html`
       <div class="automation" style=${"padding-left: " + (i * 25 + 35) + "px"}>
-        <a href="/config/automation/edit/${automation.id}" class="automation-name">
+        <a
+          href="/config/automation/edit/${automation.id}"
+          class="automation-name"
+        >
           ${automation.path[automation.path.length - 1]}
         </a>
         <div class="automation-last-run">
-          <a href="/config/automation/trace/${automation.id}" class="automation-trace">
-            ${AutomationsTree.fromNow( automation.last_triggered)}
-          </a>  
+          <a
+            href="/config/automation/trace/${automation.id}"
+            class="automation-trace"
+          >
+            ${AutomationsTree.fromNow(automation.last_triggered)}
+          </a>
         </div>
       </div>
     `;
@@ -122,7 +128,11 @@ class AutomationsTree extends LitElement {
    * @author github.com/victornpb
    * @see https://stackoverflow.com/a/67338038/938822
    */
-  static fromNow(date, nowDate = Date.now(), rft = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" })) {
+  static fromNow(
+    date,
+    nowDate = Date.now(),
+    rft = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" })
+  ) {
     if (date == null) {
       return "Never";
     }
@@ -135,23 +145,29 @@ class AutomationsTree extends LitElement {
     const MONTH = 30 * DAY;
     const YEAR = 365 * DAY;
     const intervals = [
-      { ge: YEAR, divisor: YEAR, unit: 'year' },
-      { ge: MONTH, divisor: MONTH, unit: 'month' },
-      { ge: WEEK, divisor: WEEK, unit: 'week' },
-      { ge: DAY, divisor: DAY, unit: 'day' },
-      { ge: HOUR, divisor: HOUR, unit: 'hour' },
-      { ge: MINUTE, divisor: MINUTE, unit: 'minute' },
-      { ge: 30 * SECOND, divisor: SECOND, unit: 'seconds' },
-      { ge: 0, divisor: 1, text: 'just now' },
+      { ge: YEAR, divisor: YEAR, unit: "year" },
+      { ge: MONTH, divisor: MONTH, unit: "month" },
+      { ge: WEEK, divisor: WEEK, unit: "week" },
+      { ge: DAY, divisor: DAY, unit: "day" },
+      { ge: HOUR, divisor: HOUR, unit: "hour" },
+      { ge: MINUTE, divisor: MINUTE, unit: "minute" },
+      { ge: 30 * SECOND, divisor: SECOND, unit: "seconds" },
+      { ge: 0, divisor: 1, text: "just now" },
     ];
-    const now = typeof nowDate === 'object' ? nowDate.getTime() : new Date(nowDate).getTime();
-    const diff = now - (typeof date === 'object' ? date : new Date(date)).getTime();
+    const now =
+      typeof nowDate === "object"
+        ? nowDate.getTime()
+        : new Date(nowDate).getTime();
+    const diff =
+      now - (typeof date === "object" ? date : new Date(date)).getTime();
     const diffAbs = Math.abs(diff);
     for (const interval of intervals) {
       if (diffAbs >= interval.ge) {
         const x = Math.round(Math.abs(diff) / interval.divisor);
         const isFuture = diff < 0;
-        return interval.unit ? rft.format(isFuture ? x : -x, interval.unit) : interval.text;
+        return interval.unit
+          ? rft.format(isFuture ? x : -x, interval.unit)
+          : interval.text;
       }
     }
   }
@@ -182,7 +198,7 @@ class AutomationsTree extends LitElement {
       }
 
       div.automation-last-run {
-        float:right;
+        float: right;
         padding-right: 15px;
       }
 
