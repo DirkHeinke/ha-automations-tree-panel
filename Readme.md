@@ -22,7 +22,7 @@ panel_custom:
     module_url: /local/automations-tree.js
 ```
 
-3. If your Automations are not structured like _Folder // Folder // AutomationName_, adjust the `divider` variable in `automations-tree.js`.
+3. If your Automations are not named following the pattern _something // something // AutomationName_, adjust the `divider` variable in `automations-tree.js` to use something else than `//`.
 4. Restart Home Assistant
 
 ## Customization
