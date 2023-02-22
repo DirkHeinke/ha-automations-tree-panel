@@ -31,6 +31,7 @@ class AutomationsTree extends LitElement {
           friendly_name: this.hass.states[state].attributes.friendly_name,
           last_triggered: this.hass.states[state].attributes.last_triggered,
           path: [],
+          state: this.hass.states[state].state,
         });
       }
     });
@@ -89,7 +90,10 @@ class AutomationsTree extends LitElement {
   renderAutomation(automation, i) {
     this.calculatePath([automation]);
     return html`
-      <div class="automation" style=${"padding-left: " + (i * 25 + 35) + "px"}>
+      <div
+        class="automation ${automation.state === "off" ? "disabled" : ""}"
+        style=${"padding-left: " + (i * 25 + 35) + "px"}
+      >
         <a
           href="/config/automation/edit/${automation.id}"
           class="automation-name"
@@ -204,6 +208,10 @@ class AutomationsTree extends LitElement {
 
       div.automation a {
         text-decoration: none;
+      }
+
+      .disabled {
+        text-decoration-line: line-through;
       }
     `;
   }
