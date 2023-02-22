@@ -17,7 +17,10 @@ class AutomationsTree extends LitElement {
   divider = "//";
   // 0 = fully collapsed
   // 1..X = open Xth level folders and close others
-  defaultOpenTreeDepth=999;
+  defaultOpenTreeDepth = 999;
+  // you can adjust the height of the summary and automation elements
+  // in the CSS section at the bottom of the file
+  // (look for --automation-height and --summary-height)
   /*
    *    END ADJUST TO YOUR NEEDS
    */
@@ -159,14 +162,16 @@ class AutomationsTree extends LitElement {
   static get styles() {
     return css`
       .automation {
-        height: 30px;
-        line-height: 30px;
+        --automation-height: 30px; /* you can adjust the height of the elements here */
+        height: var(--automation-height);
+        line-height: var(--automation-height);
         border-bottom: 1px solid #9a9a9a;
       }
 
       summary {
-        height: 52px;
-        line-height: 52px;
+        --summary-height: 52px; /* you can adjust the height of the elements here */
+        height: var(--summary-height);
+        line-height: var(--summary-height);
         border-bottom: 1px solid #9a9a9a;
       }
 
