@@ -10,10 +10,12 @@ The default automation view for the automations show above looks like this:
 
 ## Installation
 
-1. Place the file `automation-tree.js` in `<config>/www/`, where `<config>` is
+1. Download the `automation-tree.js` from the
+   [github releases](https://github.com/DirkHeinke/ha-automations-tree-panel/releases).
+2. Place the file `automation-tree.js` in `<config>/www/`, where `<config>` is
    the root folder of the Home Assistant installation (the one with
    `configuration.yaml`)
-2. Add the following block to the `configuration.yaml`
+3. Add the following block to the `configuration.yaml`
 
 ```yaml
 panel_custom:
@@ -30,10 +32,10 @@ panel_custom:
       summaryHeight: 52
 ```
 
-3. If your automations are not named following the pattern _something //
+4. If your automations are not named following the pattern _something //
    something // AutomationName_, adjust the `divider` option in
    `configuration.yaml` to use something else than `//`.
-4. Restart Home Assistant
+5. Restart Home Assistant
 
 ## Customization
 
