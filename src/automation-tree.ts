@@ -1,32 +1,77 @@
-import {
-  LitElement,
-  html,
-  css,
-} from "https://unpkg.com/lit-element@2.4.0/lit-element.js?module";
+import { LitElement, html, css, PropertyValues } from "lit";
 
-class AutomationsTree extends LitElement {
+type Automation = {
+  id: string;
+  friendly_name: string;
+  last_triggered: string;
+  path: string[];
+  state: string;
+};
+
+type TreeElement = {
+  name: string;
+  automations: Automation[];
+  children: TreeElement[];
+};
+
+class AutomationTree extends LitElement {
+  hass: {
+    states: {
+      [key: string]: {
+        attributes: {
+          id: string;
+          friendly_name: string;
+          last_triggered: string;
+        };
+        state: string;
+      };
+    };
+  };
+
+  panel: {
+    config: {
+      summaryHeight: number;
+      automationHeight: number;
+      divider: string;
+      defaultOpenTreeDepth: number;
+    };
+  };
+
   static get properties() {
     return {
       hass: { type: Object },
+      panel: { type: Object },
     };
   }
 
-  /*
-   *    ADJUST TO YOUR NEEDS
-   */
-  divider = "//";
-  // 0 = fully collapsed
-  // 1..X = open Xth level folders and close others
-  defaultOpenTreeDepth = 999;
-  // you can adjust the height of the summary and automation elements
-  // in the CSS section at the bottom of the file
-  // (look for --automation-height and --summary-height)
-  /*
-   *    END ADJUST TO YOUR NEEDS
-   */
+  willUpdate(changedProperties: PropertyValues<this>) {
+    if (changedProperties.has("panel")) {
+      const automationHeight = this.panel.config.automationHeight ?? 30;
+      const summaryHeight = this.panel.config.summaryHeight ?? 52;
+      document.documentElement.style.setProperty(
+        `--at-automation-height`,
+        `${automationHeight}px`
+      );
+      document.documentElement.style.setProperty(
+        `--at-summary-height`,
+        `${summaryHeight}px`
+      );
+    }
+  }
+
+  render() {
+    let automations = this.getAutomations();
+    this.calculatePath(automations);
+    let tree = this.generateTree({
+      name: "Automations",
+      automations: automations,
+      children: [],
+    });
+    return html` ${this.renderTree(tree)} `;
+  }
 
   getAutomations() {
-    let automations = [];
+    let automations: Automation[] = [];
     Object.keys(this.hass.states).forEach((state) => {
       if (state.startsWith("automation.")) {
         automations.push({
@@ -41,45 +86,51 @@ class AutomationsTree extends LitElement {
     return automations;
   }
 
-  calculatePath(automations) {
+  calculatePath(automations: Automation[]) {
     automations.forEach((a) => {
-      let pathSegments = a.friendly_name.split(this.divider);
+      let pathSegments = a.friendly_name.split(this.panel.config.divider);
       a.path = pathSegments;
     });
   }
 
-  generateTree(tree) {
-    tree.automations = tree.automations.reduce((automations, a) => {
-      if (a.path.length == 1) {
-        automations.push(a);
-      }
-
-      if (a.path.length > 1) {
-        let firstPath = a.path.shift().trim();
-        let childWithPath = tree.children.find((c) => c.name === firstPath);
-        if (childWithPath) {
-          childWithPath.automations.push(a);
-        } else {
-          tree.children.push({
-            name: firstPath,
-            automations: [a],
-            children: [],
-          });
+  generateTree(tree: TreeElement) {
+    tree.automations = tree.automations.reduce<Automation[]>(
+      (automations, a) => {
+        if (a.path.length == 1) {
+          automations.push(a);
         }
-      }
-      return automations;
-    }, []);
+
+        if (a.path.length > 1) {
+          let firstPath = a.path.shift()!.trim();
+          let teWithSamePath = tree.children.find((c) => c.name === firstPath);
+          if (teWithSamePath) {
+            // if a tree element with the same firstPath already exists, add the automation to it
+            teWithSamePath.automations.push(a);
+          } else {
+            // create a new tree element with the firstPath and add the automation to it
+            tree.children.push({
+              name: firstPath,
+              automations: [a],
+              children: [],
+            });
+          }
+        }
+        return automations;
+      },
+      []
+    );
+    // create the subtree for each child recursively
     tree.children.forEach((tc) => {
       tc = this.generateTree(tc);
     });
     return tree;
   }
 
-  renderTree(tree, i = 0) {
+  renderTree(tree: TreeElement, i = 0) {
     i++;
     return html`
       <div id="automation">
-        <details ?open=${i <= this.defaultOpenTreeDepth}>
+        <details ?open=${i <= this.panel.config.defaultOpenTreeDepth}>
           <summary style=${"padding-left: " + (i * 25 + 10) + "px"}>
             <span> ${tree.name} </span>
           </summary>
@@ -90,7 +141,7 @@ class AutomationsTree extends LitElement {
     `;
   }
 
-  renderAutomation(automation, i) {
+  renderAutomation(automation: Automation, i) {
     this.calculatePath([automation]);
     return html`
       <div
@@ -108,22 +159,11 @@ class AutomationsTree extends LitElement {
             href="/config/automation/trace/${automation.id}"
             class="automation-trace"
           >
-            ${AutomationsTree.fromNow(automation.last_triggered)}
+            ${AutomationTree.fromNow(automation.last_triggered)}
           </a>
         </div>
       </div>
     `;
-  }
-
-  render() {
-    let automations = this.getAutomations();
-    this.calculatePath(automations);
-    let tree = this.generateTree({
-      name: "Automations",
-      automations: automations,
-      children: [],
-    });
-    return html` ${this.renderTree(tree)} `;
   }
 
   /**
@@ -137,7 +177,7 @@ class AutomationsTree extends LitElement {
    */
   static fromNow(
     date,
-    nowDate = Date.now(),
+    nowDate: Date | number = Date.now(),
     rft = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" })
   ) {
     if (date == null) {
@@ -182,16 +222,16 @@ class AutomationsTree extends LitElement {
   static get styles() {
     return css`
       .automation {
-        --automation-height: 30px; /* you can adjust the height of the elements here */
-        height: var(--automation-height);
-        line-height: var(--automation-height);
+        /* you can adjust the height of the elements here */
+        height: var(--at-automation-height);
+        line-height: var(--at-automation-height);
         border-bottom: 1px solid #9a9a9a;
       }
 
       summary {
-        --summary-height: 52px; /* you can adjust the height of the elements here */
-        height: var(--summary-height);
-        line-height: var(--summary-height);
+        /* you can adjust the height of the elements here */
+        height: var(--at-summary-height);
+        line-height: var(--at-summary-height);
         border-bottom: 1px solid #9a9a9a;
       }
 
@@ -221,4 +261,4 @@ class AutomationsTree extends LitElement {
     `;
   }
 }
-customElements.define("automations-tree", AutomationsTree);
+customElements.define("automation-tree", AutomationTree);

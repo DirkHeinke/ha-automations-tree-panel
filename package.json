@@ -1,0 +1,13 @@
+{
+  "type": "module",
+  "devDependencies": {
+    "typescript": "^5.0.4",
+    "vite": "^4.3.8"
+  },
+  "scripts": {
+    "build": "vite build"
+  },
+  "dependencies": {
+    "lit": "^2.7.4"
+  }
+}
