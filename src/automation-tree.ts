@@ -119,6 +119,14 @@ class AutomationTree extends LitElement {
       },
       []
     );
+    // sort
+    tree.children.sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    });
+    tree.automations.sort((a, b) => {
+      return a.path[0].localeCompare(b.path[0]);
+    });
+
     // create the subtree for each child recursively
     tree.children.forEach((tc) => {
       tc = this.generateTree(tc);
